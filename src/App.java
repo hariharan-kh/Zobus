@@ -3,6 +3,7 @@ import java.util.Scanner;
 
 public class App {
 
+    static String[] a = { "sleeperwithac", "seaterwithac", "sleeperwithoutac", "seaterwithoutac" };
     public static Connection con;
     public static PreparedStatement st;
     static Scanner sc = new Scanner(System.in);
@@ -41,11 +42,11 @@ public class App {
         st = con.prepareStatement("Select id from usercredentials where username = ?");
         st.setString(1, userName);
         ResultSet result = st.executeQuery();
-        Boolean avail = true;
+        Boolean useravail = true;
         while (result.next()) {
-            avail = false;
+            useravail = false;
         }
-        return avail;
+        return useravail;
     }
 
     public static void registerUser(String userName, String passWord, int age, String Gender) throws Exception {
@@ -56,6 +57,127 @@ public class App {
         st.setInt(3, age);
         st.setString(4, Gender);
         st.executeUpdate();
+    }
+
+    public static void bookTickets() throws Exception {
+        String availquery = "select Count(*) from ? where avail = 1;";
+        // st = con.prepareStatement("select Count(*) from ? where avail = 1;");
+        // st.setString(1, a[0].toString());
+        int availseats[] = new int[4];
+
+        for (int i = 0; i < a.length; i++) {
+            String availQuery = availquery.replace("?", a[i]);
+            // st.setString(1,i);
+            st = con.prepareStatement(availQuery);
+            ResultSet res = st.executeQuery();
+            res.next();
+            availseats[i] = res.getInt(1);
+            System.out.println((i == 0 ? "AC Sleeper"
+                    : i == 1 ? "AC Seater" : i == 2 ? "NonAC Sleeper" : i == 3 ? "NonAC Seater" : "") + " - "
+                    + res.getInt(1) + " seat(s) available" + " - " + (i + 1));
+        }
+        System.out.println("Enter your Choice : ");
+        int busChoice = sc.nextInt();
+        printSeats(busChoice - 1);
+        System.out.println();
+        System.out.println("---------------------------------------------");
+        System.out.println();
+        System.out.println("Enter number of seats to book : ");
+        int numberofseats = sc.nextInt();
+        if(numberofseats>0 && numberofseats<availseats[busChoice - 1]){
+            int[] seats = new int[numberofseats];
+            int[] age = new int[numberofseats];
+            String[] gender = new String[numberofseats];
+            String[] name = new String[numberofseats];
+            Boolean allSeatsAvail = true;
+            for(int i=0;i<numberofseats;i++){
+                System.out.print("Enter seat Number : ");
+                seats[i] = sc.nextInt();
+                System.out.print("Enter Age : ");
+                age[i] = sc.nextInt();
+                System.out.print("Enter Gender :  ");
+                sc.nextLine();
+                gender[i] = sc.nextLine();
+                System.out.print("Enter Name : ");
+                name[i] = sc.nextLine();
+                allSeatsAvail = allSeatsAvail && (isSeatValid(seats[i],gender[i],busChoice-1));
+            }
+            
+        }else{
+            System.out.println("Enter valid number of seats");
+        }
+    }
+
+    public static void printSeats(int bus) throws Exception {
+        String printQuery = "Select * from " + a[bus];
+        st = con.prepareStatement(printQuery);
+        ResultSet res = st.executeQuery();
+        String leftAlignFormat = "| %-4d -  %-15s ,  %-4d ( %-3s) |";
+        String nullAlignFormat = "| %-4d - %-38s |";
+        if (bus % 2 == 0) {
+            int i;
+            for (i = 0; i < 6; i++) {
+                res.next();
+                if (i == 0)
+                    System.out.println("Lower Deck");
+                if (i != 0 && i % 2 == 0) {
+                    System.out.println();
+                }
+                if (i % 4 == 0) {
+                    System.out.println();
+                }
+                if (res.getInt(6) == 0) {
+                    System.out.format(leftAlignFormat, res.getInt(1), res.getString(3), res.getInt(4), res.getString(2));
+                } else {
+                    System.out.format(nullAlignFormat,res.getInt(1), "Available");
+                }
+            }
+            System.out.println();
+            System.out.println();
+            for (; i < 12; i++) {
+                res.next();
+                if (i == 6)
+                    System.out.println("Upper Deck");
+                if (i != 6 && i % 2 == 0) {
+                    System.out.println();
+                }
+                if (i == 10) {
+                    System.out.println();
+                }
+                if (res.getInt(6) == 0) {
+                    System.out.format(leftAlignFormat, res.getInt(1), res.getString(3), res.getInt(4), res.getString(2));
+                } else {
+                    System.out.format(nullAlignFormat,res.getInt(1), "Available");
+                }
+            }
+        } else {
+            for (int i = 0; i < 12; i++) {
+                res.next();
+                if (i != 0 && i % 3 == 0) {
+                    System.out.println();
+                }
+                if (i == 6) {
+                    System.out.println();
+                }
+                if (res.getInt(6) == 0) {
+                    System.out.format(leftAlignFormat, res.getInt(1), res.getString(3), res.getInt(4), res.getString(2));
+                } else {
+                    System.out.format(nullAlignFormat,res.getInt(1), "Available");
+                }
+            }
+        }
+    }
+
+    public static Boolean isSeatValid(int seat,String gender,int bus) throws Exception{
+        Boolean isSeatAvail = true;
+        String Query = "select * from "+a[bus]+" ;";
+        st = con.prepareStatement(Query);
+        ResultSet res = st.executeQuery();
+        for(int i=0;i<12;i++){
+            res.next();
+            
+        }
+        return isSeatAvail;
     }
 
     public static void main(String[] args) throws Exception {
@@ -87,7 +209,33 @@ public class App {
                             String lpw = sc.nextLine();
                             currentUserId = validateUser(lun, lpw);
                             if (currentUserId != -1) {
-                                System.out.println("Login Successful");
+                                Boolean userChoiceExit = false;
+                                while (!userChoiceExit) {
+                                    System.out.println("1-Book Tickets");
+                                    System.out.println("2-Cancel Tickets");
+                                    System.out.println("3-Show Tickets");
+                                    System.out.println("4-LogOut");
+                                    System.out.println("Please Enter Your Choice");
+                                    System.out.println("-----------------------------");
+                                    int userChoice = sc.nextInt();
+                                    sc.nextLine();
+                                    switch (userChoice) {
+                                        case 1:
+                                            bookTickets();
+                                            break;
+                                        case 2:
+                                            System.out.println("You are in the cancellation page");
+                                            break;
+                                        case 3:
+                                            System.out.println("Your tickets are viewed here ");
+                                            break;
+                                        case 4:
+                                            userChoiceExit = true;
+                                            break;
+                                        default:
+                                            System.out.println("Enter a valid option");
+                                    }
+                                }
                             } else {
                                 System.out.println("Login Unsuccessful");
                             }
@@ -129,8 +277,8 @@ public class App {
                 case 2:
                     if (validateAdmin()) {
                         System.out.println("Admin Login Successful");
-                        
-                    }else{
+
+                    } else {
                         System.out.println("Incorrect Crentials");
                     }
                     break;
