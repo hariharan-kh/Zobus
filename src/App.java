@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Scanner;
 
 public class App {
@@ -84,13 +86,14 @@ public class App {
         System.out.println();
         System.out.println("Enter number of seats to book : ");
         int numberofseats = sc.nextInt();
-        if(numberofseats>0 && numberofseats<availseats[busChoice - 1]){
+        if (numberofseats > 0 && numberofseats < availseats[busChoice - 1]) {
+            HashSet<Integer> seatset = new HashSet<>();
             int[] seats = new int[numberofseats];
             int[] age = new int[numberofseats];
             String[] gender = new String[numberofseats];
             String[] name = new String[numberofseats];
             Boolean allSeatsAvail = true;
-            for(int i=0;i<numberofseats;i++){
+            for (int i = 0; i < numberofseats; i++) {
                 System.out.print("Enter seat Number : ");
                 seats[i] = sc.nextInt();
                 System.out.print("Enter Age : ");
@@ -100,12 +103,79 @@ public class App {
                 gender[i] = sc.nextLine();
                 System.out.print("Enter Name : ");
                 name[i] = sc.nextLine();
-                allSeatsAvail = allSeatsAvail && (isSeatValid(seats[i],gender[i],busChoice-1));
+                seatset.add(seats[i]);
+                allSeatsAvail = allSeatsAvail && (isSeatValid(seats[i], gender[i], busChoice - 1));
             }
-            
-        }else{
+            if(allSeatsAvail && seats.length==seatset.size()){
+                System.out.println("Seats Selected are "+Arrays.toString(seats));
+            }else{
+                System.out.println("Invalid Seat Selection");
+            }
+        } else {
             System.out.println("Enter valid number of seats");
         }
+    }
+
+    public static Boolean isSeatValid(int seat, String gender, int bus) throws Exception {
+        Boolean isSeatAvail = true;
+        String Query = "select * from " + a[bus] + " ;";
+        st = con.prepareStatement(Query);
+        ResultSet res = st.executeQuery();
+        if (bus % 2 == 0) {
+            for (int i = 1; i <= 12; i++) {
+                res.next();
+                if (i == seat) {
+                    isSeatAvail = res.getInt(6) == 0 ? false : true;
+                }
+                if (seat == 4 && res.getInt(1) == 2 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 2 && res.getInt(1) == 4 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 3 && res.getInt(1) == 1 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 3 && res.getInt(1) == 1 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 10 && res.getInt(1) == 8 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 8 && res.getInt(1) == 10 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 7 && res.getInt(1) == 9 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 9 && res.getInt(1) == 7 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                }
+
+            }
+        }
+        else{
+            System.out.println(seat+"-"+gender);
+            for (int i = 1; i <= 12; i++) {
+                res.next();
+                if (i == seat) {
+                    isSeatAvail = res.getInt(6) == 0 ? false : true;
+                }
+                if (seat == 5 && res.getInt(1) == 2 && !gender.equals(res.getString(2)) && (res.getString(2)!=null)) {
+                    isSeatAvail = false;
+                } else if (seat == 2 && res.getInt(1) == 5 && !gender.equals(res.getString(2)) && (res.getString(2)!=null)) {
+                    isSeatAvail = false;
+                } else if (seat == 3 && res.getInt(1) == 1 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 3 && res.getInt(1) == 1 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 10 && res.getInt(1) == 8 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 8 && res.getInt(1) == 10 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 7 && res.getInt(1) == 9 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                } else if (seat == 9 && res.getInt(1) == 7 && !gender.equals(res.getString(2)) && !(res.getString(2)==null)) {
+                    isSeatAvail = false;
+                }
+
+            }
+        }
+
+        return isSeatAvail;
     }
 
     public static void printSeats(int bus) throws Exception {
@@ -127,9 +197,10 @@ public class App {
                     System.out.println();
                 }
                 if (res.getInt(6) == 0) {
-                    System.out.format(leftAlignFormat, res.getInt(1), res.getString(3), res.getInt(4), res.getString(2));
+                    System.out.format(leftAlignFormat, res.getInt(1), res.getString(3), res.getInt(4),
+                            res.getString(2));
                 } else {
-                    System.out.format(nullAlignFormat,res.getInt(1), "Available");
+                    System.out.format(nullAlignFormat, res.getInt(1), "Available");
                 }
             }
             System.out.println();
@@ -145,9 +216,10 @@ public class App {
                     System.out.println();
                 }
                 if (res.getInt(6) == 0) {
-                    System.out.format(leftAlignFormat, res.getInt(1), res.getString(3), res.getInt(4), res.getString(2));
+                    System.out.format(leftAlignFormat, res.getInt(1), res.getString(3), res.getInt(4),
+                            res.getString(2));
                 } else {
-                    System.out.format(nullAlignFormat,res.getInt(1), "Available");
+                    System.out.format(nullAlignFormat, res.getInt(1), "Available");
                 }
             }
         } else {
@@ -160,24 +232,13 @@ public class App {
                     System.out.println();
                 }
                 if (res.getInt(6) == 0) {
-                    System.out.format(leftAlignFormat, res.getInt(1), res.getString(3), res.getInt(4), res.getString(2));
+                    System.out.format(leftAlignFormat, res.getInt(1), res.getString(3), res.getInt(4),
+                            res.getString(2));
                 } else {
-                    System.out.format(nullAlignFormat,res.getInt(1), "Available");
+                    System.out.format(nullAlignFormat, res.getInt(1), "Available");
                 }
             }
         }
-    }
-
-    public static Boolean isSeatValid(int seat,String gender,int bus) throws Exception{
-        Boolean isSeatAvail = true;
-        String Query = "select * from "+a[bus]+" ;";
-        st = con.prepareStatement(Query);
-        ResultSet res = st.executeQuery();
-        for(int i=0;i<12;i++){
-            res.next();
-            
-        }
-        return isSeatAvail;
     }
 
     public static void main(String[] args) throws Exception {
