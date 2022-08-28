@@ -7,6 +7,7 @@ import java.util.Scanner;
 public class App {
 
     static String[] a = { "sleeperwithac", "seaterwithac", "sleeperwithoutac", "seaterwithoutac" };
+    static String[] formalBusName = { "Sleeper-AC", "Seater-AC", "Sleeper-NonAC", "Seate-NonAC" };
     static int[] fare = { 700, 550, 600, 450 };
     static int[] cancellationfee = { 50, 50, 25, 25 };
     static int[] availBus = { 0, 0, 0, 0 };
@@ -153,7 +154,7 @@ public class App {
                         walset.next();
                         double wal = walset.getDouble(1);
                         st = con.prepareStatement(updateWalletQuery);
-                        st.setDouble(1,wal + seats.length * fare[busChoice - 1]);
+                        st.setDouble(1, wal + seats.length * fare[busChoice - 1]);
                         st.executeUpdate();
                         System.out.println("Your tickets are booked");
                     } else {
@@ -175,7 +176,7 @@ public class App {
     public static Boolean isSeatValid(int seat, String gender, int bus) throws Exception {
         Boolean isSeatAvail = true;
         Boolean istheseatavail = true;
-        Boolean isGender = gender == "m" || gender == "f";
+        Boolean isGender = gender.equalsIgnoreCase("m") || gender.equalsIgnoreCase("f");
         String Query = "select * from " + a[bus] + " ;";
         st = con.prepareStatement(Query);
         ResultSet res = st.executeQuery();
@@ -321,6 +322,7 @@ public class App {
                 }
             }
         }
+        System.out.println();
     }
 
     public static int viewBalance(int userID) throws Exception {
@@ -383,6 +385,8 @@ public class App {
         String viewTicketsQuery = "select bus,ticketid,fare from tickettable where bookedby = " + currentUserId + ";";
         String cancelTicketQueryFromTicketTable = "delete from tickettable where ticketid = ?";
         String updateQuery = "UPDATE table SET `gender` = null, `name` = null, `age` = null, `ticketid` = null, `avail` = '1' WHERE (`ticketid` = ?);";
+        String getWalletQuery = "select wallet from admincredentials;";
+        String updateWalletQuery = "UPDATE admincredentials SET `wallet` = ? ;";
         st = con.prepareStatement(viewTicketsQuery);
         ResultSet result = st.executeQuery();
         int count = 1;
@@ -412,20 +416,44 @@ public class App {
             System.out.println("Enter Your Choice : (1-" + (count - 1) + ")");
             int cancellationChoice = sc.nextInt();
             sc.nextLine();
-            st = con.prepareStatement(cancelTicketQueryFromTicketTable);
-            st.setString(1, bookedTickets.get(cancellationChoice - 1));
-            st.executeUpdate();
-            String cancelBus = updateQuery.replace("table", a[bookedBus.get(cancellationChoice - 1)]);
-            st = con.prepareStatement(cancelBus);
-            st.setString(1, bookedTickets.get(cancellationChoice - 1));
-            st.executeUpdate();
-            currentUserBal += (bookedBus.get(cancellationChoice - 1) % 2 == 0)
-                    ? bookedFare.get(cancellationChoice - 1) / 2
-                    : bookedFare.get(cancellationChoice - 1) / 4;
-            st = con.prepareStatement("update usercredentials set bal = ? where id = ?");
-            st.setDouble(1, currentUserBal);
-            st.setInt(2, currentUserId);
-            st.executeUpdate();
+            System.out.println("Amount Deducted for cancellation of tickets is : "
+                    + (bookedBus.get(cancellationChoice - 1) % 2 == 0
+                            ? bookedFare.get(cancellationChoice - 1) / 2
+                            : bookedFare.get(cancellationChoice - 1) / 4));
+            System.out.println("Confirm Cancellation (y/n) ? ");
+            String confirmCancel = sc.nextLine();
+            if (confirmCancel.equalsIgnoreCase("y")) {
+                st = con.prepareStatement(cancelTicketQueryFromTicketTable);
+                st.setString(1, bookedTickets.get(cancellationChoice - 1));
+                st.executeUpdate();
+                String cancelBus = updateQuery.replace("table", a[bookedBus.get(cancellationChoice - 1)]);
+                st = con.prepareStatement(cancelBus);
+                st.setString(1, bookedTickets.get(cancellationChoice - 1));
+                st.executeUpdate();
+                currentUserBal += (bookedBus.get(cancellationChoice - 1) % 2 == 0)
+                        ? bookedFare.get(cancellationChoice - 1) / 2
+                        : bookedFare.get(cancellationChoice - 1) / 4;
+                st = con.prepareStatement("update usercredentials set bal = ? where id = ?");
+                st.setDouble(1, currentUserBal);
+                st.setInt(2, currentUserId);
+                st.executeUpdate();
+                st = con.prepareStatement(getWalletQuery);
+                ResultSet wal = st.executeQuery();
+                wal.next();
+                Double wallet = wal.getDouble(1);
+                wallet -= (bookedBus.get(cancellationChoice - 1) % 2 == 0)
+                        ? bookedFare.get(cancellationChoice - 1) / 2
+                        : bookedFare.get(cancellationChoice - 1) / 4;
+                st = con.prepareStatement(updateWalletQuery);
+                st.setDouble(1,wallet);
+                st.executeUpdate();
+                System.out.println("Tickets cancelled Successfully !!!");
+            }else if(confirmCancel.equalsIgnoreCase("n")){
+                System.out.println("You made a right choice !");
+            }
+            else{
+                System.out.println("Enter a valid choice");
+            }
         } else {
             System.out.println("No tickets to cancel");
         }
@@ -470,13 +498,32 @@ public class App {
                 }
             }
         }
-        for(int i=0;i<availBus.length;i++){
-            if(availBus[i]>0){
-            System.out.println(busName[i]+" - "+availBus[i]);
-        }
+        for (int i = 0; i < availBus.length; i++) {
+            if (availBus[i] > 0) {
+                System.out.println(busName[i] + " - " + availBus[i]);
+            }
         }
     }
 
+    public static void displayFare() throws Exception{
+        ResultSet res = con.prepareStatement("select wallet from admincredentials;").executeQuery();
+        res.next();
+        System.out.println("Total fare collected is : "+res.getDouble(1));
+    }
+    public static void viewAllTickets() throws Exception{
+        String displayQuery = "select * from tickettable;";
+        ResultSet res = con.prepareStatement(displayQuery).executeQuery();
+        if(res.next()){
+            do{
+                System.out.println("TicketID : "+res.getString(1));
+                System.out.println("Booked By : "+res.getInt(2));
+                System.out.println("Bus : "+formalBusName[res.getInt(3)]);
+                System.out.println("Seats Booked : "+res.getString(4));
+                System.out.println("Fare Collected : "+res.getDouble(5));
+                System.out.println("---------------------------------------------------");
+            }while(res.next());
+        }
+    }
     public static void main(String[] args) throws Exception {
         // Class.forName("com.mysql..jdbc.Driver");
         con = DriverManager.getConnection("jdbc:mysql://localhost:3306/Zobus", "root", "19cs046H");
@@ -589,7 +636,28 @@ public class App {
                         System.out.println("Admin Login Successful");
                         Boolean adminExit = false;
                         while (!adminExit) {
-                            System.out.println("1-");
+                            System.out.println("1-View All Tickets");
+                            System.out.println("2-View Buses");
+                            System.out.println("3-Total Fare Collected");
+                            System.out.println("4-Exit");
+                            System.out.println("Enter Your Choice : ");
+                            int adminChoice = sc.nextInt();
+                            sc.nextLine();
+                            switch(adminChoice){
+                                case 1:viewAllTickets();
+                                break;
+                                case 2:for(int i=0;i<4;i++){
+                                    System.out.println(formalBusName[i]);
+                                    printSeats(i);
+                                }
+                                break;
+                                case 3:displayFare();
+                                System.out.println("Fare");
+                                break;
+                                case 4:adminExit = true;
+                                break;
+                                default:System.out.println("Enter a valid option");
+                            }
                         }
 
                     } else {
@@ -598,6 +666,8 @@ public class App {
                     break;
                 case 3:
                     totalExit = true;
+                    break;
+                default:System.out.println("Enter valid options");
             }
         }
     }
