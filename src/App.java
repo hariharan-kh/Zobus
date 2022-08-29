@@ -1,8 +1,5 @@
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Scanner;
+import java.util.*;
 
 public class App {
 
@@ -10,7 +7,7 @@ public class App {
     static String[] formalBusName = { "Sleeper-AC", "Seater-AC", "Sleeper-NonAC", "Seate-NonAC" };
     static int[] fare = { 700, 550, 600, 450 };
     static int[] cancellationfee = { 50, 50, 25, 25 };
-    static int[] availBus = { 0, 0, 0, 0 };
+    
     public static Connection con;
     public static PreparedStatement st;
     static Scanner sc = new Scanner(System.in);
@@ -75,8 +72,6 @@ public class App {
         String updateBalQuery = "UPDATE usercredentials SET `bal` = ? WHERE (`id` = ?);";
         String getWalletQuery = "select wallet from admincredentials;";
         String updateWalletQuery = "UPDATE admincredentials SET `wallet` = ? ;";
-        // st = con.prepareStatement("select Count(*) from ? where avail = 1;");
-        // st.setString(1, a[0].toString());
         int availseats[] = new int[4];
 
         for (int i = 0; i < a.length; i++) {
@@ -116,9 +111,7 @@ public class App {
                 System.out.print("Enter Name : ");
                 name[i] = sc.nextLine();
                 seatset.add(seats[i]);
-                System.out.println(isSeatValid(seats[i], gender[i], busChoice - 1));
                 allSeatsAvail = allSeatsAvail && (isSeatValid(seats[i], gender[i], busChoice - 1));
-                System.out.println(allSeatsAvail);
             }
             if (allSeatsAvail && seats.length == seatset.size()) {
                 System.out.println("The seats to be booked are : " + Arrays.toString(seats));
@@ -211,10 +204,8 @@ public class App {
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
                 }
-
             }
         } else {
-
             for (int i = 1; i <= 12; i++) {
                 res.next();
                 if (i == seat) {
@@ -245,10 +236,8 @@ public class App {
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
                 }
-
             }
         }
-
         return isSeatAvail && istheseatavail && isGender;
     }
 
@@ -390,7 +379,6 @@ public class App {
         st = con.prepareStatement(viewTicketsQuery);
         ResultSet result = st.executeQuery();
         int count = 1;
-        Boolean isAvail = false;
         if (result.next()) {
             do {
                 String viewSingleTicketQuery = "select * from table where ticketid = ?;";
@@ -460,6 +448,7 @@ public class App {
     }
 
     public static void showAvailability() throws Exception {
+        int[] availBus = { 0, 0, 0, 0 };
         int[] preferanceBus = { 1, 2, 3, 4 };
         String availquery = "select Count(*) from ? where avail = 1;";
         String[] busName = { "sleeperwithac", "seaterwithac", "sleeperwithoutac", "seaterwithoutac" };
