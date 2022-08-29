@@ -641,7 +641,6 @@ public class App {
                                 }
                                 break;
                                 case 3:displayFare();
-                                System.out.println("Fare");
                                 break;
                                 case 4:adminExit = true;
                                 break;
