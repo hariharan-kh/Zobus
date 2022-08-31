@@ -7,7 +7,7 @@ public class App {
     static String[] formalBusName = { "Sleeper-AC", "Seater-AC", "Sleeper-NonAC", "Seate-NonAC" };
     static int[] fare = { 700, 550, 600, 450 };
     static int[] cancellationfee = { 50, 50, 25, 25 };
-    
+
     public static Connection con;
     public static PreparedStatement st;
     static Scanner sc = new Scanner(System.in);
@@ -101,17 +101,32 @@ public class App {
             String[] name = new String[numberofseats];
             Boolean allSeatsAvail = true;
             for (int i = 0; i < numberofseats; i++) {
+                System.out.println("Enter your "+(i+1)+" th seat : ");
+                int seatx;
+                String genderx;
+                int agex;
+                int chance = 0;
+                String namex;
+                do{
+                    if(chance==1){System.out.println(" Invalid Seat ! Last Chance");}
                 System.out.print("Enter seat Number : ");
-                seats[i] = sc.nextInt();
+                seatx= sc.nextInt();
                 System.out.print("Enter Age : ");
-                age[i] = sc.nextInt();
+                agex = sc.nextInt();
                 System.out.print("Enter Gender :  ");
                 sc.nextLine();
-                gender[i] = sc.nextLine();
+                genderx = sc.nextLine();
                 System.out.print("Enter Name : ");
-                name[i] = sc.nextLine();
+                namex = sc.nextLine();
+                chance+=1;
+            }while(!isSeatValid(seatx, genderx, busChoice - 1) && chance<2);
+                seats[i] = seatx;
+                age[i] = agex;
+                gender[i] = genderx;
+                name[i] = namex;
                 seatset.add(seats[i]);
                 allSeatsAvail = allSeatsAvail && (isSeatValid(seats[i], gender[i], busChoice - 1));
+                System.out.println("--------------------------------------");
             }
             if (allSeatsAvail && seats.length == seatset.size()) {
                 System.out.println("The seats to be booked are : " + Arrays.toString(seats));
@@ -179,16 +194,16 @@ public class App {
                 if (i == seat) {
                     istheseatavail = res.getInt(6) == 0 ? false : true;
                 }
-                if (seat == 4 && res.getInt(1) == 2 && !gender.equals(res.getString(2))
+                if (seat == 1 && res.getInt(1) == 3 && !gender.equals(res.getString(2))
+                        && !(res.getString(2) == null)) {
+                    isSeatAvail = false;
+                } else if (seat == 3 && res.getInt(1) == 1 && !gender.equals(res.getString(2))
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
                 } else if (seat == 2 && res.getInt(1) == 4 && !gender.equals(res.getString(2))
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
-                } else if (seat == 3 && res.getInt(1) == 1 && !gender.equals(res.getString(2))
-                        && !(res.getString(2) == null)) {
-                    isSeatAvail = false;
-                } else if (seat == 3 && res.getInt(1) == 1 && !gender.equals(res.getString(2))
+                } else if (seat == 4 && res.getInt(1) == 2 && !gender.equals(res.getString(2))
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
                 } else if (seat == 10 && res.getInt(1) == 8 && !gender.equals(res.getString(2))
@@ -217,22 +232,34 @@ public class App {
                 } else if (seat == 2 && res.getInt(1) == 5 && !gender.equals(res.getString(2))
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
-                } else if (seat == 3 && res.getInt(1) == 1 && !gender.equals(res.getString(2))
+                } else if (seat == 4 && res.getInt(1) == 1 && !gender.equals(res.getString(2))
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
-                } else if (seat == 3 && res.getInt(1) == 1 && !gender.equals(res.getString(2))
+                } else if (seat == 1 && res.getInt(1) == 1 && !gender.equals(res.getString(2))
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
-                } else if (seat == 10 && res.getInt(1) == 8 && !gender.equals(res.getString(2))
+                } else if (seat == 11 && res.getInt(1) == 8 && !gender.equals(res.getString(2))
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
-                } else if (seat == 8 && res.getInt(1) == 10 && !gender.equals(res.getString(2))
+                } else if (seat == 8 && res.getInt(1) == 11 && !gender.equals(res.getString(2))
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
-                } else if (seat == 7 && res.getInt(1) == 9 && !gender.equals(res.getString(2))
+                } else if (seat == 7 && res.getInt(1) == 10 && !gender.equals(res.getString(2))
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
-                } else if (seat == 9 && res.getInt(1) == 7 && !gender.equals(res.getString(2))
+                } else if (seat == 10 && res.getInt(1) == 7 && !gender.equals(res.getString(2))
+                        && !(res.getString(2) == null)) {
+                    isSeatAvail = false;
+                } else if (seat == 3 && res.getInt(1) == 6 && !gender.equals(res.getString(2))
+                        && !(res.getString(2) == null)) {
+                    isSeatAvail = false;
+                } else if (seat == 6 && res.getInt(1) == 3 && !gender.equals(res.getString(2))
+                        && !(res.getString(2) == null)) {
+                    isSeatAvail = false;
+                } else if (seat == 9 && res.getInt(1) == 12 && !gender.equals(res.getString(2))
+                        && !(res.getString(2) == null)) {
+                    isSeatAvail = false;
+                } else if (seat == 12 && res.getInt(1) == 9 && !gender.equals(res.getString(2))
                         && !(res.getString(2) == null)) {
                     isSeatAvail = false;
                 }
@@ -403,44 +430,132 @@ public class App {
 
             System.out.println("Enter Your Choice : (1-" + (count - 1) + ")");
             int cancellationChoice = sc.nextInt();
-            sc.nextLine();
-            System.out.println("Amount Deducted for cancellation of tickets is : "
-                    + (bookedBus.get(cancellationChoice - 1) % 2 == 0
+            System.out.println("1-Cancel Ticket");
+            System.out.println("2-Cancel Seats");
+            int part = sc.nextInt();
+            System.out.println("--------------------------------------------");
+            if (part == 1) {
+                sc.nextLine();
+                System.out.println("Amount Deducted for cancellation of tickets is : "
+                        + (bookedBus.get(cancellationChoice - 1) % 2 == 0
+                                ? bookedFare.get(cancellationChoice - 1) / 2
+                                : bookedFare.get(cancellationChoice - 1) / 4));
+                System.out.println("Confirm Cancellation (y/n) ? ");
+                String confirmCancel = sc.nextLine();
+                if (confirmCancel.equalsIgnoreCase("y")) {
+                    st = con.prepareStatement(cancelTicketQueryFromTicketTable);
+                    st.setString(1, bookedTickets.get(cancellationChoice - 1));
+                    st.executeUpdate();
+                    String cancelBus = updateQuery.replace("table", a[bookedBus.get(cancellationChoice - 1)]);
+                    st = con.prepareStatement(cancelBus);
+                    st.setString(1, bookedTickets.get(cancellationChoice - 1));
+                    st.executeUpdate();
+                    currentUserBal += (bookedBus.get(cancellationChoice - 1)<2 )
                             ? bookedFare.get(cancellationChoice - 1) / 2
-                            : bookedFare.get(cancellationChoice - 1) / 4));
-            System.out.println("Confirm Cancellation (y/n) ? ");
-            String confirmCancel = sc.nextLine();
-            if (confirmCancel.equalsIgnoreCase("y")) {
-                st = con.prepareStatement(cancelTicketQueryFromTicketTable);
+                            : bookedFare.get(cancellationChoice - 1) / 4;
+                    st = con.prepareStatement("update usercredentials set bal = ? where id = ?");
+                    st.setDouble(1, currentUserBal);
+                    st.setInt(2, currentUserId);
+                    st.executeUpdate();
+                    st = con.prepareStatement(getWalletQuery);
+                    ResultSet wal = st.executeQuery();
+                    wal.next();
+                    Double wallet = wal.getDouble(1);
+                    wallet -= (bookedBus.get(cancellationChoice - 1) <2)
+                            ? bookedFare.get(cancellationChoice - 1) / 2
+                            : bookedFare.get(cancellationChoice - 1) / 4;
+                    st = con.prepareStatement(updateWalletQuery);
+                    st.setDouble(1, wallet);
+                    st.executeUpdate();
+                    System.out.println("Tickets cancelled Successfully !!!");
+                } else if (confirmCancel.equalsIgnoreCase("n")) {
+                    System.out.println("You made a right choice !");
+                } else {
+                    System.out.println("Enter a valid choice");
+                }
+            } else if (part == 2) {
+                st = con.prepareStatement("select seat from table where ticketid = ?;".replace("table",
+                        a[bookedBus.get(cancellationChoice - 1)]));
                 st.setString(1, bookedTickets.get(cancellationChoice - 1));
-                st.executeUpdate();
-                String cancelBus = updateQuery.replace("table", a[bookedBus.get(cancellationChoice - 1)]);
-                st = con.prepareStatement(cancelBus);
-                st.setString(1, bookedTickets.get(cancellationChoice - 1));
-                st.executeUpdate();
-                currentUserBal += (bookedBus.get(cancellationChoice - 1) % 2 == 0)
-                        ? bookedFare.get(cancellationChoice - 1) / 2
-                        : bookedFare.get(cancellationChoice - 1) / 4;
-                st = con.prepareStatement("update usercredentials set bal = ? where id = ?");
-                st.setDouble(1, currentUserBal);
-                st.setInt(2, currentUserId);
-                st.executeUpdate();
-                st = con.prepareStatement(getWalletQuery);
-                ResultSet wal = st.executeQuery();
-                wal.next();
-                Double wallet = wal.getDouble(1);
-                wallet -= (bookedBus.get(cancellationChoice - 1) % 2 == 0)
-                        ? bookedFare.get(cancellationChoice - 1) / 2
-                        : bookedFare.get(cancellationChoice - 1) / 4;
-                st = con.prepareStatement(updateWalletQuery);
-                st.setDouble(1,wallet);
-                st.executeUpdate();
-                System.out.println("Tickets cancelled Successfully !!!");
-            }else if(confirmCancel.equalsIgnoreCase("n")){
-                System.out.println("You made a right choice !");
-            }
-            else{
-                System.out.println("Enter a valid choice");
+                ResultSet res = st.executeQuery();
+                int chno = 1;
+                ArrayList<Integer> bookedSeats = new ArrayList<>();
+                while (res.next()) {
+                    System.out.println(chno + "-" + res.getInt(1));
+                    bookedSeats.add(res.getInt(1));
+                    chno += 1;
+                }
+                System.out.println("Enter number of seats to cancel : ");
+                int no = sc.nextInt();
+                System.out.println("---------------------------");
+                if (chno > no) {
+                    System.out.println("Enter the Choice For Seats Number(s) : ");
+                    HashSet<Integer> seatSet = new HashSet<>();
+                    ArrayList<Integer> seatsToCancel = new ArrayList<>();
+                    Boolean isIns = true;
+                    for (int i = 0; i < no; i++) {
+                        int x = sc.nextInt();
+                        if (x <= 0 || x > chno) {
+                            isIns = false;
+                        }
+                        seatSet.add(x);
+                        seatsToCancel.add(bookedSeats.get(x - 1));
+                    }
+                    sc.nextLine();
+                    if (seatSet.size() == no && isIns) {
+
+                        System.out.println("Amount Deducted for cancellation of tickets is : "
+                                + (bookedFare.get(cancellationChoice - 1)
+                                        - bookedFare.get(cancellationChoice - 1) * no / bookedSeats.size()
+                                                / (bookedBus.get(cancellationChoice - 1) <2 ? 2 : 4)));
+                        System.out.println("Seats to be cancelled are : ");
+                        for (Integer x : seatsToCancel) {
+                            System.out.println(x);
+                        }
+                        System.out.println("Confirm Cancellation (y/n) ? ");
+                        String x = sc.nextLine();
+                        if (x.charAt(0) == 'y') {
+                            String updBusQuery = "UPDATE table SET `gender` = null, `name` = null, `age` = null, `ticketid` = null, `avail` = '1' WHERE (`seat` = ?);";
+                            String updTicQuery = "UPDATE tickettable SET `seat`=? , `fare`=? WHERE (`ticketid` = ?);";
+                            String updBalanceQuery = "UPDATE usercredentials set `bal` = ? WHERE (id=?)";
+                            String newUpdBusQuery = updBusQuery.replace("table",
+                                    a[bookedBus.get(cancellationChoice - 1)]);
+                            for (Integer v : seatsToCancel) {
+                                st = con.prepareStatement(newUpdBusQuery);
+                                st.setInt(1, v);
+                                st.executeUpdate();
+                            }
+                            st = con.prepareStatement(updTicQuery);
+                            st.setString(1, seatsToCancel.toString());
+                            st.setDouble(2,
+                                    bookedFare.get(cancellationChoice - 1)
+                                            - bookedFare.get(cancellationChoice - 1) * no / bookedSeats.size()
+                                                    / (bookedBus.get(cancellationChoice - 1) <2 ? 2 : 4));
+                            st.setString(3, bookedTickets.get(cancellationChoice - 1));
+                            st.executeUpdate();
+                            System.out.println(
+                                    "Tickets cancelled from the ticket : " + bookedTickets.get(cancellationChoice - 1));
+                            st = con.prepareStatement(updBalanceQuery);
+                            st.setInt(2, currentUserId);
+                            st.setDouble(1,
+                                    currentUserBal + bookedFare.get(cancellationChoice - 1) * no / bookedSeats.size()
+                                            / (bookedBus.get(cancellationChoice - 1) <2 ? 2 : 4));
+                            st.executeUpdate();
+                        } else if (x.charAt(0) == 'n') {
+                            System.out.println("Tickets Not cancelled");
+                        } else {
+                            System.out.println("Enter a valid choice \n Your cancellation is not confirmed !");
+                        }
+
+                    } else {
+                        System.out.println("Dont Enter duplicate choices or invalid choices");
+                    }
+                } else {
+                    System.out.println("Enter valid number of seats to cancel");
+                }
+
+            } else {
+                System.out.println("Enter a valid cancellation choice");
             }
         } else {
             System.out.println("No tickets to cancel");
@@ -494,25 +609,27 @@ public class App {
         }
     }
 
-    public static void displayFare() throws Exception{
+    public static void displayFare() throws Exception {
         ResultSet res = con.prepareStatement("select wallet from admincredentials;").executeQuery();
         res.next();
-        System.out.println("Total fare collected is : "+res.getDouble(1));
+        System.out.println("Total fare collected is : " + res.getDouble(1));
     }
-    public static void viewAllTickets() throws Exception{
+
+    public static void viewAllTickets() throws Exception {
         String displayQuery = "select * from tickettable;";
         ResultSet res = con.prepareStatement(displayQuery).executeQuery();
-        if(res.next()){
-            do{
-                System.out.println("TicketID : "+res.getString(1));
-                System.out.println("Booked By : "+res.getInt(2));
-                System.out.println("Bus : "+formalBusName[res.getInt(3)]);
-                System.out.println("Seats Booked : "+res.getString(4));
-                System.out.println("Fare Collected : "+res.getDouble(5));
+        if (res.next()) {
+            do {
+                System.out.println("TicketID : " + res.getString(1));
+                System.out.println("Booked By : " + res.getInt(2));
+                System.out.println("Bus : " + formalBusName[res.getInt(3)]);
+                System.out.println("Seats Booked : " + res.getString(4));
+                System.out.println("Fare Collected : " + res.getDouble(5));
                 System.out.println("---------------------------------------------------");
-            }while(res.next());
+            } while (res.next());
         }
     }
+
     public static void main(String[] args) throws Exception {
         // Class.forName("com.mysql..jdbc.Driver");
         con = DriverManager.getConnection("jdbc:mysql://localhost:3306/Zobus", "root", "19cs046H");
@@ -632,19 +749,24 @@ public class App {
                             System.out.println("Enter Your Choice : ");
                             int adminChoice = sc.nextInt();
                             sc.nextLine();
-                            switch(adminChoice){
-                                case 1:viewAllTickets();
-                                break;
-                                case 2:for(int i=0;i<4;i++){
-                                    System.out.println(formalBusName[i]);
-                                    printSeats(i);
-                                }
-                                break;
-                                case 3:displayFare();
-                                break;
-                                case 4:adminExit = true;
-                                break;
-                                default:System.out.println("Enter a valid option");
+                            switch (adminChoice) {
+                                case 1:
+                                    viewAllTickets();
+                                    break;
+                                case 2:
+                                    for (int i = 0; i < 4; i++) {
+                                        System.out.println(formalBusName[i]);
+                                        printSeats(i);
+                                    }
+                                    break;
+                                case 3:
+                                    displayFare();
+                                    break;
+                                case 4:
+                                    adminExit = true;
+                                    break;
+                                default:
+                                    System.out.println("Enter a valid option");
                             }
                         }
 
@@ -655,7 +777,8 @@ public class App {
                 case 3:
                     totalExit = true;
                     break;
-                default:System.out.println("Enter valid options");
+                default:
+                    System.out.println("Enter valid options");
             }
         }
     }
