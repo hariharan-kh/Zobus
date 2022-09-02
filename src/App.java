@@ -392,7 +392,6 @@ public class App {
                 System.out.println("-----------------------------------------------------");
                 count += 1;
             } while (result.next());
-
             System.out.println("Enter Your Choice : (1-" + (count - 1) + ")");
             int cancellationChoice = sc.nextInt();
             System.out.println("1-Cancel Ticket");
@@ -468,14 +467,10 @@ public class App {
                     }
                     sc.nextLine();
                     if (seatSet.size() == no && isIns) {
-
                         System.out.println("Amount Deducted for cancellation of tickets is : "
                                 + fare[bookedBus.get(cancellationChoice - 1)] * no
                                         / (bookedBus.get(cancellationChoice - 1) < 2 ? 2 : 4));
-                        System.out.println("Seats to be cancelled are : ");
-                        for (Integer x : seatsToCancel) {
-                            System.out.println(x);
-                        }
+                        System.out.println("Seats to be cancelled are : " + seatsToCancel);
                         System.out.println("Confirm Cancellation (y/n) ? ");
                         String x = sc.nextLine();
                         if (x.charAt(0) == 'y') {
@@ -602,12 +597,12 @@ public class App {
     }
 
     public static void viewSummary() throws Exception {
-        String CanceledQuery = "select sum(cancelled) from table where cancelled>0;";
+        String CanceledQuery = "select sum(cancelled) from table;";
         String BookedQuery = "select count(*) from table where avail = 0;";
         String fareQuery = "select sum(fare) from tickettable where bus = ?;";
         for (int i = 0; i < a.length; i++) {
             String newCancel = CanceledQuery.replace("table", a[i]);
-            String newBook = CanceledQuery.replace("table", a[i]);
+            String newBook = BookedQuery.replace("table", a[i]);
             st = con.prepareStatement(newCancel);
             st1 = con.prepareStatement(newBook);
             st2 = con.prepareStatement(fareQuery);
@@ -621,12 +616,15 @@ public class App {
             System.out.println(formalBusName[i] + "-->" + res1.getInt(1) + "Booked + " + res.getInt(1) + " cancelled");
             System.out.println("Fare collected : " + res2.getDouble(1));
         }
-
     }
-
+    public static void clear(){
+        System.out.print("\033[H\033[2J");  
+        System.out.flush();  
+    }
     public static void main(String[] args) throws Exception {
         // Class.forName("com.mysql..jdbc.Driver");
         con = DriverManager.getConnection("jdbc:mysql://localhost:3306/Zobus", "root", "19cs046H");
+        clear();
         Boolean totalExit = false;
         while (!totalExit) {
             System.out.println("1-User");
@@ -645,6 +643,7 @@ public class App {
                     System.out.println("-----------------------------");
                     int onBoardChoice = sc.nextInt();
                     sc.nextLine();
+                    clear();
                     switch (onBoardChoice) {
                         case 1:
                             System.out.print("Enter Username : ");
@@ -666,6 +665,7 @@ public class App {
                                     System.out.println("-----------------------------");
                                     int userChoice = sc.nextInt();
                                     sc.nextLine();
+                                    clear();
                                     switch (userChoice) {
                                         case 1:
                                             bookTickets();
@@ -707,6 +707,7 @@ public class App {
                             sc.nextLine();
                             System.out.print("Enter Gender : (m/f) ");
                             String gen = sc.nextLine();
+                            clear();
                             if (rage > 0) {
                                 if (usernameAvail(run)) {
                                     if ((Character.toLowerCase(gen.charAt(0)) == 'm'
@@ -767,7 +768,6 @@ public class App {
                                     System.out.println("Enter a valid option");
                             }
                         }
-
                     } else {
                         System.out.println("Incorrect Crentials");
                     }
