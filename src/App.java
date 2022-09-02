@@ -446,6 +446,7 @@ public class App {
         ArrayList<String> bookedTickets = new ArrayList<>();
         ArrayList<Integer> bookedBus = new ArrayList<>();
         ArrayList<Double> bookedFare = new ArrayList<>();
+        ArrayList<Integer> bookedNoSeats = new ArrayList<>();
         String viewTicketsQuery = "select bus,ticketid,fare from tickettable where bookedby = " + currentUserId + ";";
         String cancelTicketQueryFromTicketTable = "delete from tickettable where ticketid = ?";
         String updateQuery = "UPDATE table SET `gender` = null, `name` = null, `age` = null, `ticketid` = null, `avail` = '1' , `cancelled`=`cancelled`+1 WHERE (`ticketid` = ?);";
@@ -466,11 +467,14 @@ public class App {
                 bookedTickets.add(result.getString(2));
                 bookedBus.add(result.getInt(1));
                 bookedFare.add(result.getDouble(3));
+                int seats = 0;
                 while (passengers.next()) {
                     System.out.println("Seat no. : " + passengers.getInt(1) + "-" + "Name : " + passengers.getString(3)
                             + "-" + passengers.getString(2)
                             + "(" + passengers.getInt(4) + ")");
+                            seats+=1;
                 }
+                bookedNoSeats.add(seats);
                 System.out.println("Total Fare : " + result.getDouble(3));
                 System.out.println("-----------------------------------------------------");
                 count += 1;
@@ -486,8 +490,8 @@ public class App {
                 sc.nextLine();
                 System.out.println("Amount Deducted for cancellation of tickets is : "
                         + (bookedBus.get(cancellationChoice - 1) < 2
-                                ? bookedFare.get(cancellationChoice - 1) / 2
-                                : bookedFare.get(cancellationChoice - 1) / 4));
+                                ? fare[bookedBus.get(cancellationChoice-1)]*bookedNoSeats.get(cancellationChoice-1) / 2
+                                : fare[bookedBus.get(cancellationChoice-1)]*bookedNoSeats.get(cancellationChoice-1)  / 4));
                 System.out.println("Confirm Cancellation (y/n) ? ");
                 String confirmCancel = sc.nextLine();
                 if (confirmCancel.equalsIgnoreCase("y")) {
@@ -498,9 +502,9 @@ public class App {
                     st = con.prepareStatement(cancelBus);
                     st.setString(1, bookedTickets.get(cancellationChoice - 1));
                     st.executeUpdate();
-                    currentUserBal += (bookedBus.get(cancellationChoice - 1) < 2)
-                            ? bookedFare.get(cancellationChoice - 1) / 2
-                            : bookedFare.get(cancellationChoice - 1) / 4;
+                    currentUserBal += bookedBus.get(cancellationChoice - 1) < 2
+                    ? fare[bookedBus.get(cancellationChoice-1)]*bookedNoSeats.get(cancellationChoice-1) / 2
+                    : fare[bookedBus.get(cancellationChoice-1)]*bookedNoSeats.get(cancellationChoice-1)  / 4;
                     st = con.prepareStatement("update usercredentials set bal = ? where id = ?");
                     st.setDouble(1, currentUserBal);
                     st.setInt(2, currentUserId);
@@ -509,9 +513,9 @@ public class App {
                     ResultSet wal = st.executeQuery();
                     wal.next();
                     Double wallet = wal.getDouble(1);
-                    wallet -= (bookedBus.get(cancellationChoice - 1) < 2)
-                            ? bookedFare.get(cancellationChoice - 1) / 2
-                            : bookedFare.get(cancellationChoice - 1) / 4;
+                    wallet -= bookedBus.get(cancellationChoice - 1) < 2
+                    ? fare[bookedBus.get(cancellationChoice-1)]*bookedNoSeats.get(cancellationChoice-1) / 2
+                    : fare[bookedBus.get(cancellationChoice-1)]*bookedNoSeats.get(cancellationChoice-1)  / 4;
                     st = con.prepareStatement(updateWalletQuery);
                     st.setDouble(1, wallet);
                     st.executeUpdate();
@@ -587,6 +591,14 @@ public class App {
                             st.setDouble(1,
                                     currentUserBal + fare[bookedBus.get(cancellationChoice - 1)] * no
                                             / (bookedBus.get(cancellationChoice - 1) < 2 ? 2 : 4));
+                            st.executeUpdate();
+                            st = con.prepareStatement(getWalletQuery);
+                            ResultSet wal = st.executeQuery();
+                            wal.next();
+                            Double wallet = wal.getDouble(1);
+                            st = con.prepareStatement(updateWalletQuery);
+                            st.setDouble(1,wallet -  fare[bookedBus.get(cancellationChoice - 1)] * no
+                                    / (bookedBus.get(cancellationChoice - 1) < 2 ? 2 : 4));
                             st.executeUpdate();
                         } else if (x.charAt(0) == 'n') {
                             System.out.println("Tickets Not cancelled");
@@ -676,25 +688,25 @@ public class App {
         }
     }
 
-    public static void viewSummary() throws Exception{
-        String  CanceledQuery = "select sum(cancelled) from table where cancelled>0;";
+    public static void viewSummary() throws Exception {
+        String CanceledQuery = "select sum(cancelled) from table where cancelled>0;";
         String BookedQuery = "select count(*) from table where avail = 0;";
         String fareQuery = "select sum(fare) from tickettable where bus = ?;";
-        for(int i=0;i<a.length;i++){
+        for (int i = 0; i < a.length; i++) {
             String newCancel = CanceledQuery.replace("table", a[i]);
             String newBook = CanceledQuery.replace("table", a[i]);
             st = con.prepareStatement(newCancel);
             st1 = con.prepareStatement(newBook);
             st2 = con.prepareStatement(fareQuery);
-            st2.setInt(1,i);
+            st2.setInt(1, i);
             ResultSet res2 = st2.executeQuery();
             ResultSet res = st.executeQuery();
             ResultSet res1 = st1.executeQuery();
             res.next();
             res1.next();
             res2.next();
-            System.out.println(formalBusName[i]+"-->"+res1.getInt(1)+"Booked + "+res.getInt(1)+" cancelled");
-            System.out.println("Fare collected : "+res2.getDouble(1));
+            System.out.println(formalBusName[i] + "-->" + res1.getInt(1) + "Booked + " + res.getInt(1) + " cancelled");
+            System.out.println("Fare collected : " + res2.getDouble(1));
         }
 
     }
@@ -832,7 +844,8 @@ public class App {
                                 case 3:
                                     displayFare();
                                     break;
-                                case 4:viewSummary();
+                                case 4:
+                                    viewSummary();
                                     break;
                                 case 5:
                                     adminExit = true;
